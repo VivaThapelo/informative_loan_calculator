@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 
-import 'LoanObjectClass.dart';
+import 'Loan.dart';
 
 const int ANNUITY = 0, DIFFERENTIATED = 1, FIXED_PAYMENTS = 2;
-LoanObjectClass loaned = new LoanObjectClass();
+Loan loaned = new Loan();
 String downType = "%", lastType = "%", monthlyType = "%", disposableType = "%";
 int selectedLoan = 0, selectedInterestType = 0;
+int periodMonths = 0,
+    periodYears = 0,
+    period = 0;
 
 void main() => runApp(MyApp());
 
@@ -61,11 +64,11 @@ class _MyHomePageState extends State<MyHomePage> {
             title: const Text('Form Data'),
             children: <Widget>[
               new Center(
-                child: new Text(loaned.loanAmount.toString() +
+                child: new Text(loaned.amount.toString() +
                     '\n' +
-                    loaned.loanInterestPercentage.toString() +
+                    loaned.getInterest().toString() +
                     '\n' +
-                    loaned.loanDisposableCommission.toString()),
+                    loaned.getDisposableCommission().toString()),
               ),
 
               /* SimpleDialogOption(
@@ -119,60 +122,6 @@ class _MyHomePageState extends State<MyHomePage> {
   clearAll() {
     clearForm(); // clearing the fields
     loaned.clearObject(); // clearing the class
-  }
-
-  onDownPaymentChange() {
-    if (_downPaymentController.text.isNotEmpty) {
-      if (downType == ".00") {
-        loaned.setDownPayment(
-            double.parse(_downPaymentController.text.toString()));
-      } else {
-        loaned.setDownPayment(
-            (double.parse(_downPaymentController.text.toString()) / 100) *
-                double.parse(_amountController.text.toString()));
-      }
-    }
-  }
-
-  onDisposableChange() {
-    if (_disposableCommissionController.text.isNotEmpty) {
-      if (disposableType == ".00") {
-        loaned.setDisposableCommission(
-            double.parse(_disposableCommissionController.text.toString()));
-      } else {
-        loaned.setDisposableCommission(
-            (double.parse(_disposableCommissionController.text.toString()) /
-                    100) *
-                double.parse(_amountController.text.toString()));
-      }
-    }
-  }
-
-  onMonthlyChange() {
-    if (_monthlyCommissionController.text.isNotEmpty) {
-      if (monthlyType == ".00") {
-        print(double.parse(_monthlyCommissionController.text.toString()));
-        loaned.setMonthlyCommission(
-            double.parse(_monthlyCommissionController.text.toString()));
-      } else {
-        loaned.setMonthlyCommission(
-            (double.parse(_monthlyCommissionController.text.toString()) / 100) *
-                double.parse(_amountController.text.toString()));
-      }
-    }
-  }
-
-  onLastChange() {
-    if (_lastPaymentController.text.isNotEmpty) {
-      if (lastType == ".00") {
-        loaned.setLastPayment(
-            double.parse(_lastPaymentController.text.toString()));
-      } else {
-        loaned.setLastPayment(
-            (double.parse(_lastPaymentController.text.toString()) / 100) *
-                double.parse(_amountController.text.toString()));
-      }
-    }
   }
 
   @override
@@ -337,7 +286,7 @@ class _MyHomePageState extends State<MyHomePage> {
               new Flexible(
                 flex: 3,
                 child: new DropdownButton(
-                  value: loaned.loanPeriodYears,
+                    value: loaned.getPeriod(),
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -438,22 +387,19 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                   onChanged: (periodYears) {
                     setState(() {
-                      loaned.setPeriodYears(periodYears);
+                      loaned.setPeriod(
+                          periodYears * 12); // *12 is converting to months
                     });
                   },
                   isExpanded: true,
-                  hint: new Text(
-                    'Years',
-                    style: new TextStyle(
-                      fontSize: 18.0,
-                    ),
-                  ),
+                    hint: new DropdownMenuItem(
+                      child: new Text('Years'), value: null,)
                 ),
               ),
               new Flexible(
                 flex: 3,
                 child: new DropdownButton(
-                  value: loaned.loanPeriodMonths,
+                    value: periodMonths,
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -554,22 +500,18 @@ class _MyHomePageState extends State<MyHomePage> {
                   ],
                   onChanged: (periodMonths) {
                     setState(() {
-                      loaned.setPeriodMonths(periodMonths);
+                      loaned.setPeriod(periodMonths);
                     });
                   },
                   isExpanded: true,
-                  hint: new Text(
-                    'Months',
-                    style: new TextStyle(
-                      fontSize: 18.0,
-                    ),
-                  ),
+                    hint: new DropdownMenuItem(
+                      child: new Text('Months'), value: null,)
                 ),
               ),
             ],
           ),
 
-          ///// the ones at the bottom ---- add magin/padding at top by 16.0
+          ///// the ones at the bottom ---- add margin/padding at top by 16.0
 
           // Down Payment
           new Row(
@@ -583,14 +525,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       hintText: "e.g. 400",
                       helperText: "value or percentage from loan amount"),
                   onChanged: (downPayment) {
-                    onDownPaymentChange(); // executes the storing code
+                    loaned.setDownPayment(
+                        double.parse(downPayment)); // executes the storing code
                   },
                 ),
               ),
               new Flexible(
                 flex: 2,
                 child: new DropdownButton(
-                  value: downType,
+                  value: loaned.getDownPayment(),
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -607,10 +550,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       value: ".00",
                     ),
                   ],
-                  onChanged: (type) {
+                  hint: new DropdownMenuItem(child: new Text('%'), value: "%",),
+                  onChanged: (downPaymentType) {
                     setState(() {
-                      downType = type;
-                      onDownPaymentChange();
+                      loaned.setDownPaymentType(downPaymentType);
                     });
                     // executes the storing code
                   },
@@ -632,14 +575,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       hintText: "e.g. 200",
                       helperText: "value or percentage from loan amount"),
                   onChanged: (disposableCommission) {
-                    onDisposableChange();
+                    loaned.setDisposableCommission(
+                        double.parse(disposableCommission));
                   },
                 ),
               ),
               new Flexible(
                 flex: 2,
                 child: new DropdownButton(
-                  value: disposableType,
+                  value: loaned.getDisposableCommissionType(),
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -656,10 +600,11 @@ class _MyHomePageState extends State<MyHomePage> {
                       value: ".00",
                     ),
                   ],
-                  onChanged: (value) {
-                    onDisposableChange();
+                  hint: new DropdownMenuItem(child: new Text('%'), value: "%",),
+                  onChanged: (disposableCommissionType) {
                     setState(() {
-                      disposableType = value;
+                      loaned.setDisposableCommissionType(
+                          disposableCommissionType);
                     });
                   },
                   isExpanded: true,
@@ -680,15 +625,16 @@ class _MyHomePageState extends State<MyHomePage> {
                       hintText: "e.g. 150",
                       helperText:
                           "value or percentage from monthly commission"),
-                  onChanged: (value) {
-                    onMonthlyChange();
+                  onChanged: (monthlyCommission) {
+                    loaned.setMonthlyCommission(
+                        double.parse(monthlyCommission));
                   },
                 ),
               ),
               new Flexible(
                 flex: 2,
                 child: new DropdownButton(
-                  value: monthlyType,
+                  value: loaned.getMonthlyCommission(),
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -705,10 +651,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       value: ".00",
                     ),
                   ],
-                  onChanged: (value) {
+                  hint: new DropdownMenuItem(child: new Text('%'), value: "%",),
+                  onChanged: (monthlyCommissionType) {
                     setState(() {
-                      monthlyType = value;
-                      onMonthlyChange();
+                      loaned.setMonthlyCommissionType(monthlyCommissionType);
                     });
                   },
                   isExpanded: true,
@@ -728,15 +674,15 @@ class _MyHomePageState extends State<MyHomePage> {
                       labelText: "Last Payment",
                       hintText: "e.g. 350",
                       helperText: "value or percentage from month"),
-                  onChanged: (value) {
-                    onLastChange();
+                  onChanged: (residue) {
+                    loaned.setResidue(double.parse(residue));
                   },
                 ),
               ),
               new Flexible(
                 flex: 2,
                 child: new DropdownButton(
-                  value: lastType,
+                  value: loaned.getResidue(),
                   items: [
                     new DropdownMenuItem(
                       child: new Text(
@@ -753,10 +699,10 @@ class _MyHomePageState extends State<MyHomePage> {
                       value: ".00",
                     ),
                   ],
-                  onChanged: (value) {
+                  hint: new DropdownMenuItem(child: new Text('%'), value: "%",),
+                  onChanged: (residueType) {
                     setState(() {
-                      lastType = value;
-                      onLastChange();
+                      loaned.setResidueType(residueType);
                     });
                   },
                   isExpanded: true,
