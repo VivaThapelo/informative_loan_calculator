@@ -1,8 +1,10 @@
 import 'dart:core';
 import 'dart:math';
-import 'Payment.dart';
-import 'Loan.dart';
+
 import 'package:informative_loan_calculator/Calc.dart';
+
+import 'Loan.dart';
+import 'Payment.dart';
 
 abstract class AbstractCalc implements Calc {
 
@@ -66,7 +68,11 @@ abstract class AbstractCalc implements Calc {
     List<double> payments = <double>[loan.getPeriod().toDouble()];
     int i = 0;
     for (Payment payment in loan.getPayments()) {
-      payments[i++] = payment.getAmount().toDouble();
+      try {
+        payments[i++] = payment.getAmount().toDouble();
+      } catch (e) {
+        print(e);
+      }
     }
 
     double x = calcEffRateUsingIterativeApproach(

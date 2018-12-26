@@ -24,10 +24,10 @@ class Loan {
   double monthlyCommission;
   double residue;
 
-  int downPaymentType;
-  int disposableCommissionType;
-  int monthlyCommissionType;
-  int residueType;
+  int downPaymentType = 0;
+  int disposableCommissionType = 0;
+  int monthlyCommissionType = 0;
+  int residueType = 0;
 
   double downPaymentPayment;
   double disposableCommissionPayment;
@@ -142,7 +142,7 @@ class Loan {
   }
 
   setPeriod(int period) {
-    this.period += period; // stored in months
+    this.period = period; // stored in months
   }
 
   double getDisposableCommission() {
@@ -237,12 +237,12 @@ class Loan {
     this.monthlyCommission = monthlyCommission;
   }
 
-  setResiduePayment(double lastPayment) {
+  setResidue(double lastPayment) {
     this.residue = lastPayment;
   }
 
-  void setResidue(double residue) {
-    this.residue = residue;
+  void setResiduePayment(double residuePayment) {
+    this.residuePayment = residuePayment;
   }
 
   bool hasDownPayment() {
