@@ -725,10 +725,26 @@ class _MyHomePageState extends State<MyHomePage> {
             // Differentiated
             DifferentiatedCalculator DiffClc = new DifferentiatedCalculator();
             DiffClc.calculate(loaned);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      MyAnnuityPage(
+                        loan: loaned,
+                      )),
+            );
           } else if (selectedLoan == 2) {
             // Fixed payments
             FixedPaymentCalculator FixedClc = new FixedPaymentCalculator();
             FixedClc.calculate(loaned);
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      MyAnnuityPage(
+                        loan: loaned,
+                      )),
+            );
           }
         },
         tooltip: 'Calculate',
