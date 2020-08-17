@@ -1,5 +1,7 @@
 # informative_loan_calculator
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/bd5613cfae6f46ada08c0906c49e5d55)](https://app.codacy.com/manual/katlehotech/informative_loan_calculator?utm_source=github.com&utm_medium=referral&utm_content=katlehotech/informative_loan_calculator&utm_campaign=Badge_Grade_Dashboard)
+
 an informative loan calculator.
 
 ## Getting Started
